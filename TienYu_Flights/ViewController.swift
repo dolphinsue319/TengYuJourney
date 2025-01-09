@@ -10,6 +10,7 @@ import UIKit
 class ViewController: UIViewController {
 
     private let tableView = UITableView()
+    private let activityIndicator = UIActivityIndicatorView(style: .large)
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -18,10 +19,17 @@ class ViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+
+        activityIndicator.center = view.center
+        activityIndicator.startAnimating()
+        view.addSubview(activityIndicator)
+        
         Task { [weak self] in
             guard let self else { return }
             await self.viewModel.fetchAllJourneys()
             Task { @MainActor in
+                self.activityIndicator.stopAnimating()
+                self.activityIndicator.removeFromSuperview()
                 self.tableView.reloadData()
             }
         }
@@ -31,7 +39,6 @@ class ViewController: UIViewController {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellIdentifier)
         tableView.frame = view.bounds
         tableView.dataSource = self
-        tableView.delegate = self
         view.addSubview(tableView)
     }
 
@@ -51,10 +58,5 @@ extension ViewController: UITableViewDataSource {
         cell.textLabel?.text = journey
         return cell
     }
-}
-
-// MARK: - UITableViewDelegate
-extension ViewController: UITableViewDelegate {
-    // Implement delegate methods if needed
 }
 
