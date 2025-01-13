@@ -23,7 +23,8 @@ class ViewControllerVM {
 
     // 使用 async/await 同步等候三筆資料後再進行合併
     func fetchAllJourneys() async {
-        return await withTaskGroup(of: [String].self) { group in
+        return await withTaskGroup(of: [String].self) { [weak self] group in
+            guard let self else { return }
             // 新增子任務
             group.addTask {
                 await TUAPIManager.fetchFlights()
